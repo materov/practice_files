@@ -1,7 +1,7 @@
 # Начало работы с графикой в R, библиотека {ggplot2} ----------------------
 # 17 апреля 2025 года
 # Е.Н. Матеров для курса ITMO Большие данные и аналитика
-# ПЗ 1.5
+# ПЗ 2.2
 # цель занятия - отработать базовые навыки работы с библиотекой {ggplot2}
 
 
@@ -127,13 +127,18 @@ diamonds |>
   ggplot(aes(x = carat, y = price)) + 
   geom_boxplot(aes(group = cut_width(carat, 0.2)))
 
+# пропорции
 diamonds |>
   ggplot(aes(x = cut, fill = clarity)) +
   geom_bar(position = "fill") +
   scale_y_continuous(name = "процент", 
-                     labels = label_percent()) +
-  viridis::scale_fill_viridis(option = "magma",
-                              discrete = TRUE)
+                     labels = label_percent())
+
+# немног лучше - видим динамику
+diamonds |>
+  ggplot(aes(x = cut, fill = clarity)) +
+  geom_bar(position = "dodge")
+
 
 # данные mpg --------------------------------------------------------------
 # зачем нужны vars в facet_grid
@@ -170,3 +175,5 @@ economics |>
        caption = "по данным economics") +
   silgelib::theme_roboto() +
   theme(legend.position = "right")
+
+
