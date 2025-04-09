@@ -1,4 +1,7 @@
-
+# загрузка библиотек ------------------------------------------------------
+library(tidyverse)
+conflicted::conflicts_prefer(dplyr::filter)
+library(magrittr)
 
 # 1.работа с цветом -------------------------------------------------------
 
@@ -22,8 +25,10 @@ small_gapminder |>
   coord_flip() +
   scale_y_continuous(labels = scales::comma_format(big.mark = " "),
                      breaks = seq(from = 0, to = 2000, by = 200)) +
-  labs(y = "максимум численности населения, млн",
+  labs(title = "Максимум численности населения, млн",
        x = "",
+       y = "по данным Gapminder",
+       
        fill = "континент") +
   # viridis::scale_fill_viridis(option = "plasma",
   #                             discrete = TRUE) +
@@ -38,7 +43,7 @@ penguins |>
   ggplot(aes(x = flipper_length_mm, 
              fill = sex)) + 
   geom_bar() +
-  gghighlight() +
+  gghighlight::gghighlight() +
   facet_wrap(vars(sex)) +
   silgelib::theme_roboto() +
   labs(x = "размах крыла, мм")
@@ -66,4 +71,40 @@ gapminder |>
   hrbrthemes::theme_ipsum()
 
 
+# 3. показ неопределенностей ----------------------------------------------
+
+library(ggdist)
+
+penguins |>
+  na.omit() |>
+  ggplot(aes(x = body_mass_g / 1000, y = species)) +
+  ggdist::stat_halfeye(
+    position = "dodgejust",
+    aes(fill = species)
+    ) + 
+  ggdist::stat_interval(alpha = 0.6) +
+  labs(x = "масса в кг",
+       y = "") +
+  viridis::scale_color_viridis(option = "plasma", 
+                               direction = -1,
+                               discrete = T,
+                               name = "уровень")
+
+# 
+
+# множественные распределния
+# ggside
+
+# ggridges
+# paletteer
+
+# выделение части графика, аннотирование
   
+library(tidyverse)
+
+base_packages <- as_tibble(installed.packages()) |> 
+  select(Package, Priority) |>
+  filter(Priority == "base")
+base_packages
+
+# -------------------------------------------------------------------------

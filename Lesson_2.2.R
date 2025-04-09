@@ -84,7 +84,7 @@ gapminder |>
   scale_y_log10(labels = scales::label_log()) +
   facet_wrap(vars(continent),
              scales = "free_y") +
-  gghighlight(max(lifeExp) > 75, 
+  gghighlight::gghighlight(max(lifeExp) > 75, 
               use_direct_label = FALSE) +
   #theme_light()
   silgelib::theme_roboto()

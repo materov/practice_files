@@ -57,3 +57,8 @@ ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
   geom_text_repel(hjust = 1, vjust = 1) +
   geom_point(color = 'red') +
   theme_classic(base_size = 16)
+
+# ggtext
+# ggforce - увеличение части графика
+# geomtextpath
+# gganimate
