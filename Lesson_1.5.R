@@ -294,12 +294,14 @@ data_students_longer <-
 
 # гистограмма с подсветкой ------------------------------------------------
 data_students_longer |> 
-  ggplot(aes(x = value, fill = score)) + 
+  ggplot(aes(x = value / 100, fill = score)) + 
   geom_histogram(bins = 30, alpha = 0.8) +
+  scale_x_continuous(labels = percent) +
   facet_wrap(vars(score)) +
   gghighlight::gghighlight() +
   ggsci::scale_fill_aaas() +
-  theme_minimal()
+  theme_minimal() +
+  labs(x = "", y = "")
 
 # нормальность распределения ----------------------------------------------
 # ggpubr::ggqqplot(data_students$math_score, 
@@ -318,11 +320,13 @@ data_students |>
     )
   ) |> 
   count(`образование родителей`, {{ var_1 }}, {{ var_2 }}) |>
-    ggplot(aes(x = {{ var_1 }}, y = {{ var_2 }}, 
+    ggplot(aes(x = {{ var_1 }} / 100, y = {{ var_2 }} / 100, 
                color = `образование родителей`, size = n)) + 
     geom_point(alpha = 0.5) +
+    scale_x_continuous(labels = percent) +
+    scale_y_continuous(labels = percent) +
     facet_wrap(vars(`образование родителей`)) +
-    theme_bw() +
+    hrbrthemes::theme_ipsum() +
     coord_fixed()
 }
 
