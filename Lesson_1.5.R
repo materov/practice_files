@@ -11,7 +11,7 @@
 # загружаем данные (CSV, MS Excel, Google sheets, parquet)
 # проверяем заголовки (названия переменных)
 # проверяем типы данных
-# ищем пропущенные значения
+# ищем пропущенные значения na.omit(), na.rm = TRUE
 # категориальные переменные: проводим count()-анализ
 # непрерывные переменные: строим гистограммы и попарные корреляции
 # категорные / непрерывные: боксплоты
@@ -33,11 +33,14 @@ conflicted::conflicts_prefer(dplyr::filter)
 library(magrittr)
 
 # посмотрим имена ---------------------------------------------------------
+
 deliveries |> names()
 
 # рассмотрим данные -------------------------------------------------------
 View(deliveries)
+
 glimpse(deliveries)
+
 
 # столбиковая диаграмма ---------------------------------------------------
 deliveries |>
@@ -75,7 +78,7 @@ deliveries_base
 
 # гистограмма = расстояния ------------------------------------------------
 deliveries_base |>
-  ggplot(aes(x = distance)) + 
+  ggplot(aes(x = velocity)) + 
   geom_histogram(bins = 60) +
   scale_x_log10()
 
@@ -93,8 +96,8 @@ deliveries_base |>
          day = fct_rev(day)) |>
   summarise(total_sum = sum(value),
             .by = c(day, delivery_hour)) |>
-  ggplot(aes(x = delivery_hour, y = total_sum, 
-             group = day, color = day)) + 
+  ggplot(aes(delivery_hour, y = total_sum,
+             group = day, colour = day)) +
   geom_line() +
   labs(x = "час доставки",
        y = "количество товаров",
@@ -112,6 +115,7 @@ deliveries_base |>
   labs(x = "час доставки",
        y = "суммарное расстояние доставки (в км)",
        color = "день недели")
+
 
 # расстояние / время доставки ---------------------------------------------
 deliveries_base |>
@@ -239,7 +243,7 @@ View(low_parental_level_of_education)
 high_parental_level_of_education |> 
   # mutate(total_score = math_score + reading_score + writing_score) |>
   rowwise() |> 
-  mutate(total_score = sum(c_across(ends_with("_score")))) |> 
+  mutate(total_score = mean(c_across(ends_with("_score")))) |> 
   ungroup() |>
   summarise(mean_score = mean(total_score))
 
@@ -260,7 +264,8 @@ ggpairs(data_students |>
 
 # гистограмма -------------------------------------------------------------
 data_students |>
-  ggplot(aes(x = math_score)) + geom_histogram()
+  ggplot(aes(x = math_score / 100)) + geom_histogram() +
+  scale_x_continuous(labels = percent)
 
 library(scales)
 # reading_score -----------------------------------------------------------

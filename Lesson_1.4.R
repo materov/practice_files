@@ -102,7 +102,7 @@ starwars |>
 
 # поместим все числовые переменные в начало
 starwars |>
-  relocate(is.numeric)
+  relocate(where(is.numeric))
 
 # определенные переменные
 vars <- c("name", "height", "mass")
@@ -115,7 +115,7 @@ starwars_data <- raw_data |>
   select(-films, -vehicles, -starships, -sex) |>
   na.omit(c(hair_color, birth_year))
 
-starwars_data
+starwars_data |> View()
 View(starwars_data)
 
 # создание новых переменных -----------------------------------------------
@@ -141,7 +141,8 @@ starwars_data |>
 # создание переменной с помощью команды case_when(),
 # которая создает переменную при соблюдении условий
 starwars |>
-  mutate(type = case_when(
+  mutate(type = 
+    case_when(
     # условия
     height > 200 | mass > 200 ~ "large",
     species == "Droid" ~ "robot",
@@ -196,20 +197,24 @@ starwars_data |> slice_sample(n = 5)
 
 # упорядочивание по возрастанию
 starwars_data |>
-  arrange(height)
+  arrange(desc(height))
 
 # упорядочивание по убыванию
 starwars_data |>
   arrange(desc(height)) |> head(3) # или arrange(-height)
 
 # подсчет числа элементов
-count(starwars_data, eye_color)
+starwars_data |>
+  count(eye_color)
 count(starwars_data, eye_color, sort = TRUE)
 
 # добавление колонки с количеством повторений
 starwars_data |>
   select(name, hair_color) |>
   add_count(hair_color)
+
+
+# группировка -------------------------------------------------------------
 
 # группировка
 starwars_data |>
@@ -225,12 +230,18 @@ starwars_data |>
   summarise(num_by_gender = n(),
             .by = gender)
 
+starwars_data |>
+  summarise(mean_height = mean(height),
+            .by = c(gender, homeworld))
+
 # группировка по двум переменным
 starwars_data |>
   summarise(min_height = min(height),
             .by = c(gender, homeworld))
 
 starwars_data %<>% na.omit(c(hair_color, birth_year))
+# starwars_data <- starwars_data |>
+#   na.omit(c(hair_color, birth_year))
 
 # сводные характеристики
 starwars_data |>
@@ -247,7 +258,7 @@ starwars_data |>
 
 # функция rowwise() -------------------------------------------------------
 
-# вычисления по столбцам в данных по строкам
+# вычисления по строкам
 starwars_data |>
   select(where(is.numeric)) |> 
   rowwise() |>
@@ -257,7 +268,7 @@ starwars_data |>
 # pivot_longer() ----------------------------------------------------------
 
 # таблица c результатами опроса, в котором спрашивали людей об их религии и годовом доходе
-relig_income
+relig_income |> View()
 
 relig_income |>
   pivot_longer(cols = !religion,       # столбцы, которые остаются после преобразования
@@ -266,7 +277,7 @@ relig_income |>
   arrange(desc(count))
 
 # рейтинг по неделям
-billboard
+billboard |> View()
 
 billboard_long <- billboard |>
   pivot_longer(
@@ -289,7 +300,7 @@ billboard_long |>
 billboard_long |>
   summarise(pseudo_rank = sum(n() / rank),
             .by = artist) |>
-  arrange(desc(pseudo_rank)) 
+  arrange(desc(pseudo_rank))
 
 # pivot_wider() -----------------------------------------------------------
 
@@ -303,5 +314,5 @@ us_rent |>
   pivot_wider(
     names_from = variable,
     values_from = c(estimate, moe)
-  )
+  ) |> View()
 
