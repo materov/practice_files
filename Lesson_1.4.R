@@ -278,14 +278,18 @@ billboard_long <- billboard |>
   ) |>
   mutate(week = as.numeric(week)) %T>% print()
 
-# общий рейтинг - кто дольше всех был в топе
+# кто дольше всех был в топе
 billboard_long |> 
-  arrange(rank) |>
+  # arrange(rank) |>
   summarise(weeks_top = n(),
-            .by = c(artist, rank)) |>
-  summarise(total_rank = sum(weeks_top),
             .by = artist) |>
-  arrange(desc(total_rank)) 
+  arrange(desc(weeks_top))
+
+# общий рейтинг - кто дольше всех был в топе на более высоком месте   
+billboard_long |>
+  summarise(pseudo_rank = sum(n() / rank),
+            .by = artist) |>
+  arrange(desc(pseudo_rank)) 
 
 # pivot_wider() -----------------------------------------------------------
 
