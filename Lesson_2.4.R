@@ -3,6 +3,11 @@ library(tidyverse)
 conflicted::conflicts_prefer(dplyr::filter)
 library(magrittr)
 
+
+# labels - аннотирование --------------------------------------------------
+
+
+
 # 1.работа с цветом -------------------------------------------------------
 
 library(gapminder)
@@ -71,6 +76,15 @@ gapminder |>
   hrbrthemes::theme_ipsum()
 
 
+# выделение части данных --------------------------------------------------
+
+
+
+# еще раз про highlight ---------------------------------------------------
+
+# можно с labels
+
+
 # 3. показ неопределенностей ----------------------------------------------
 
 library(ggdist)
@@ -99,12 +113,7 @@ penguins |>
 # paletteer
 
 # выделение части графика, аннотирование
-  
-library(tidyverse)
 
-base_packages <- as_tibble(installed.packages()) |> 
-  select(Package, Priority) |>
-  filter(Priority == "base")
-base_packages
+
 
 # -------------------------------------------------------------------------

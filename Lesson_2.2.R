@@ -8,8 +8,8 @@
 # загрузка библиотек ------------------------------------------------------
 library(tidyverse)
 conflicted::conflicts_prefer(dplyr::filter)
-# в R 4.5 можно сделать так:
-# use("dplyr", c("filter", "select"))
+# в R > 4.4 можно сделать так:
+use("dplyr", c("filter", "select"))
 library(magrittr)
 
 # данные для исследования
