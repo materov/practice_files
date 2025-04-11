@@ -62,8 +62,11 @@ gg + geom_point() +
 gg <- gapminder |>
   ggplot(aes(x = gdpPercap, 
              y = lifeExp,
-             color = continent)) + 
-  geom_point(alpha = 0.3)
+             fill = continent)) + 
+  geom_point(alpha = 0.7,
+             size = 2.5,
+             color = "white",
+             shape = 21)
 gg
 
 # логарифмическое преобразование
@@ -101,7 +104,8 @@ gg + silgelib::theme_roboto() +
 gg
 
 # моделирование
-gg + geom_smooth(method = "lm") # method = "loess" / "gam"
+gg + geom_smooth(method = "lm",
+                 linewidth = 0.5) # method = "loess" / "gam"
 
 # пример боксплота --------------------------------------------------------
 
