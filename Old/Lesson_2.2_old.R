@@ -269,38 +269,72 @@ silgelib::theme_roboto() +
   theme(legend.position = "right")
 gg_economics
 
+# данные diamonds ---------------------------------------------------------
 
-# пример преобразования в значениях ---------------------------------------
-
-# исходный график
-
-gg_diamonds <-
+# пример facet_grid + scales = "free"
+# точки
 diamonds |>
   mutate(cut = fct_rev(cut)) |>
   ggplot(aes(x = carat, y = price)) + 
   geom_point(alpha = 0.1, 
              size = 0.1,
-             show.legend = FALSE)
-gg_diamonds
+             show.legend = FALSE) +
+  scale_y_continuous(transform = "sqrt",
+                     labels = scales::dollar) +
+  #geom_smooth(color = "red", linewidth = 0.7, method = "lm") +
+  facet_grid(cols = vars(clarity),
+             rows = vars(cut),
+             scales = "free")
 
-# преобразованный график
-gg_diamonds + scale_y_continuous(transform = "sqrt",
-                                 labels = scales::dollar)
+# hexplot
+diamonds |>
+  ggplot(aes(x = carat, y = price)) + 
+  scale_y_log10(labels = scales::dollar) +
+  #geom_point() +
+  geom_hex(bins = 60) +
+  viridis::scale_fill_viridis(option = "turbo") +
+  labs(x = "вес, карат",
+       y = "цена, log-формат")
 
+# боксплоты
+diamonds |>
+  mutate(cut = fct_reorder(cut, carat)) |>
+  ggplot(aes(x = cut, y = carat)) + 
+  geom_boxplot() +
+  coord_flip()
 
-# пример с пропорциями ----------------------------------------------------
+diamonds |>
+  ggplot(aes(x = carat, y = price)) + 
+  geom_boxplot(aes(group = cut_width(carat, 0.2)))
 
+# пропорции
 diamonds |>
   ggplot(aes(x = cut, fill = clarity)) +
   geom_bar(position = "fill") +
   scale_y_continuous(name = "процент", 
                      labels = label_percent())
 
-# вариант отображения пропорций -------------------------------------------
-
+# немног лучше - видим динамику
 diamonds |>
   ggplot(aes(x = cut, fill = clarity)) +
   geom_bar(position = "dodge")
+
+
+# данные mpg --------------------------------------------------------------
+# зачем нужны vars в facet_grid
+ggplot(mpg, aes(displ, hwy, size = cty)) +
+  geom_point(alpha = 0.3, 
+             fill = "grey30",
+             color = "white",
+             shape = 21) + 
+  facet_grid(cols = vars(year, drv),
+             rows = vars(cyl), 
+             # все значения на оси y
+             axes = "all_y")
+
+
+# данные economics --------------------------------------------------------
+
 
 
 
