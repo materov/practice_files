@@ -4,6 +4,105 @@ conflicted::conflicts_prefer(dplyr::filter)
 library(magrittr)
 
 
+# 1. комбинирование графиков ----------------------------------------------
+# patchwork + cowplot
+
+library(ggplot2)
+library(patchwork)
+
+p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp)) + 
+  ggtitle("График 1")
+p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear)) + 
+  ggtitle("График 2")
+p3 <- ggplot(mtcars) + geom_smooth(aes(disp, qsec)) + 
+  labs(tag = "A")
+p4 <- ggplot(mtcars) + geom_bar(aes(carb)) + 
+  labs(tag = "B")
+
+# комбинирование графиков в patchwork
+p1 + p2
+p3 + p4
+
+(p1 | p2) /
+   p3
+
+library(cowplot)
+
+# комбинирование графиков в cowplot
+plot_grid(p1, p2, 
+          labels = c("A", "B"), 
+          label_size = 12)
+
+
+# 2. шкалирование радиуса -------------------------------------------------
+# scale_size
+
+library(palmerpenguins)
+df_penguins <- 
+  penguins |>
+  select(-island, -year) |>
+  na.omit()
+
+df_penguins
+
+# базовый график
+gg_penguins <-
+df_penguins |>
+ggplot(aes(x = bill_length_mm, 
+           y = bill_depth_mm)) +
+  geom_point(aes(color = body_mass_g,
+                 size = body_mass_g), 
+             alpha = 0.3) 
+
+# изменение масштаба точек, сравните:
+gg_penguins + 
+  scale_size(range = c(1, 2))
+
+gg_penguins + 
+  scale_size(range = c(2, 7))
+
+
+# 3. Markdown в подписях к графику ----------------------------------------
+
+library(ggtext)
+
+gg_penguins_text <-
+gg_penguins +
+  labs(title = "Размеры клюва кистехвостых пингвинов 
+       <i style='color:#28A87D;font-size:20pt;font-family:serif;'>Pygoscelis</i><br><span style = 'font-size:10pt; color:grey'>
+       Набор данных <span style = 'color:black;'>palmerpenguins</span> для исследования 
+    и визуализации данных <br>был собран <span style = 'color:black;'>Dr. Kristen Gorman</span> со станции 
+    **Palmer Station, Antarctica LTER**.<br>
+    Данные включают в себя три вида пингвинов: 
+    <span style = 'color:#0072B2;'>Adelie</span>, 
+    <span style = 'color:#D55E00;'>Chinstrap</span> и 
+    <span style = 'color:#018571;'>Gentoo</span>.</span>",
+       caption = "Данные: Gorman, Williams и Fraser (2014), журнал *PLoS ONE*",
+       x = "**Длина клюва** (в мм)",
+       y = "**Глубина клюва** (в мм)") +
+  theme_minimal() +
+  theme(
+    plot.title = element_markdown(face = "bold"),
+    plot.caption = element_markdown(margin = margin(t = 15)),
+    axis.title.x = element_markdown(),
+    axis.title.y = element_markdown()
+  )
+
+gg_penguins_text 
+
+# 2. guide_legend для проработки легенды ----------------------------------
+
+
+
+# как переписать легенду?
+# размер точек - пропорции
+# gt() + ggplot2
+
+# аннотирование
+library(ggrepel)
+
+
+
 # labels - аннотирование --------------------------------------------------
 
 # ggforce
