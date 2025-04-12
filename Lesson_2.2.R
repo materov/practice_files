@@ -9,7 +9,7 @@
 library(tidyverse)
 conflicted::conflicts_prefer(dplyr::filter)
 # в R > 4.4 можно сделать так:
-use("dplyr", c("filter", "select"))
+# use("dplyr", c("filter", "select"))
 library(magrittr)
 
 # данные для исследования
@@ -18,7 +18,7 @@ data("gapminder")
 
 # темы графиков
 library(hrbrthemes) # либо library(tinythemes)
-# pak::pak(juliasilge/silgelib)
+# pak::pak(juliasilge/silgelib) + устанавливаем шрифты Roboto
 # шкалирование
 library(scales)
 # https://bookdown.org/Maxine/ggplot2-maps/posts/2019-11-27-using-scales-package-to-modify-ggplot2-scale/
@@ -39,6 +39,9 @@ gapminder |>
   # aes() "эстетика" - что отображается
   ggplot(mapping = aes(x = gdpPercap, y = lifeExp))
 
+# посмотрите спецификации эстетики
+# https://ggplot2.tidyverse.org/articles/ggplot2-specs.html
+
 # первый график
 gapminder |>
   ggplot(aes(x = gdpPercap, y = lifeExp)) +
@@ -47,40 +50,48 @@ gapminder |>
 # сохраним основу для графика
 gg <- gapminder |>
   ggplot(aes(x = gdpPercap, y = lifeExp))
+gg + geom_point()
 
-# всевозможные подписи к графику
-gg + geom_point() +
-  # текст подписей
-  labs(title    = "Данные Gapminder",
-       subtitle = "экономические и социальные показатели: продолжительность жизни \nи ВВП на душу населения стран с течением времени",
-       x        = "ВВП на душу населения",
-       y        = "продолжительность жизни, лет",
-       caption  = "данные с 1952 по 2007 год")
+# инспектируем график
+gg$data
+gg$mapping
+gg$labels
 
 # улучшение графика
 # добавим цвет и прозрачность
-gg <- gapminder |>
+gg <- 
+  gapminder |>
+  # удобство подхода с оператором |>
+  # можно данные отфильтровать или сделать иные действия
+  filter(year <= 1990) |>
   ggplot(aes(x = gdpPercap, 
              y = lifeExp,
              fill = continent)) + 
   geom_point(alpha = 0.7,
              size = 2.5,
              color = "white",
-             shape = 21)
+             shape = 21) 
+gg
+
+# rugged plot
+gg <- gg +
+  geom_rug(aes(x = gdpPercap, y = lifeExp,
+               color = continent), 
+           alpha = 0.1)
 gg
 
 # логарифмическое преобразование
 gg <- gg + scale_x_log10(labels = scales::dollar)
 gg
 
-# можно убрать легенду
+# панелирование
+gg <- gg + facet_wrap(~continent)
+gg
+
+# можно убрать легенду, поскольку цвет соответствует панелям
 gg <- gg + theme(legend.position = "none") 
 gg
   
-# панелирование
-gg <- gg + facet_wrap(vars(continent)) 
-gg
-
 # подписи к графику
 gg <- gg + 
   labs(title    = "Данные Gapminder",
@@ -88,26 +99,35 @@ gg <- gg +
        x        = "\nВВП на душу населения (log-шкала)",
        y        = "продолжительность жизни, лет\n",
        color    = "континент:",
-       caption  = "данные с 1952 по 2007 год")
+       caption  = "данные с 1952 по 1990 год",
+       tag = "Рис. 1")
 gg
 
 # цвет значений
-gg <- gg + ggsci::scale_color_d3()
+gg <- gg + 
+  # для geom_point()
+  ggsci::scale_fill_d3() +
+  # для geom_rug()
+  ggsci::scale_color_d3() 
 gg
 
 # тема
-gg <- 
-gg + silgelib::theme_roboto() +
-  theme(legend.position = "none")
+gg <- gg + silgelib::theme_roboto() +
+  theme(legend.position = "none",                      # убираем легенду
+        panel.grid.minor = element_blank(),            # и часть сетки
+        plot.subtitle = element_text(face = "plain"))  # шрифт подзаголовка
 # gg + hrbrthemes::theme_ipsum()
 # gg + theme_classic()
+# gg + theme_light()
+# gg + theme_minimal()
 gg
 
 # моделирование
-gg + geom_smooth(method = "lm",
-                 linewidth = 0.5) # method = "loess" / "gam"
+gg + geom_smooth(method = "lm",   # method = "loess" / "gam"
+                 linewidth = 0.7,
+                 aes(color = continent))
 
-# пример боксплота --------------------------------------------------------
+# пример боксплота и преобразования шкалы ---------------------------------
 
 # оценим прирост населения
 gg_boxplot <-
@@ -306,5 +326,11 @@ diamonds |>
   ggplot(aes(x = cut, fill = clarity)) +
   geom_bar(position = "dodge")
 
+
+# задание -----------------------------------------------------------------
+
+# попробуйте сделайть аналогичные графики для набора данных mtcars и starwars
+# (предварительно преобразуйте категориальные переменные в факторные!)
+# рассмотрите всевозможные типы графиков
 
 
