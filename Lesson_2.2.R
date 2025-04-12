@@ -127,6 +127,21 @@ gg + geom_smooth(method = "lm",   # method = "loess" / "gam"
                  linewidth = 0.7,
                  aes(color = continent))
 
+# как сохранить график? ---------------------------------------------------
+
+# ggsave(gg, filename = "my_plot.png")
+# 
+# ggsave("my_plot.png")
+# 
+# ggsave("my_plot.png", width = 8, height = 5, dpi = 600)
+# 
+# ggsave("my_plot.pdf", width = 20, height = 12, unit = "cm", 
+#        device = cairo_pdf)
+# 
+# grDevices::cairo_pdf("my_plot.pdf", width = 10, height = 7)
+# gg
+# dev.off()
+
 # пример боксплота и преобразования шкалы ---------------------------------
 
 # оценим прирост населения
