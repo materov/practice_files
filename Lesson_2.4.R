@@ -88,7 +88,7 @@ gg_penguins +
     axis.title.y = element_markdown()
   )
 
-gg_penguins_text 
+gg_penguins_text
 
 # 2. guide_legend для проработки легенды ----------------------------------
 
