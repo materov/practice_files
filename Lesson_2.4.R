@@ -31,12 +31,14 @@ p3 + p4
 
 # комбинация графиков
 (p1 | p2) /
-  p3 
+  p3
 
 # применение темы
 (p1 | p2) /
    p3 & theme(legend.position = "none", 
-              plot.background = element_rect(color = "black", linewidth = 1))
+              plot.background = element_rect(color = "black", 
+                                             # раньше это был size!
+                                             linewidth = 1))
 
 # размеры объектов
 (p1 | p2) /
@@ -64,7 +66,8 @@ starwars |>
   ggplot(aes(x = homeworld, y = height)) +
   geom_boxplot(fill = "grey90") +
   labs(x = "планета", y = "рост") +
-  silgelib::theme_roboto()
+  bbplot::bbc_style()
+
 long_boxplot
 
 long_boxplot + 
@@ -283,4 +286,11 @@ gg_final_2
 
 # -------------------------------------------------------------------------
 
+# сторонние темы
 
+# ggpubr
+# hrbrthemes
+# silgelib
+# bbplot
+# ggthemes
+# theme_tufte
