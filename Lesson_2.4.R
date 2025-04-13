@@ -29,8 +29,18 @@ p4 <- ggplot(mtcars) + geom_bar(aes(carb)) +
 p1 + p2
 p3 + p4
 
+# комбинация графиков
 (p1 | p2) /
-   p3
+  p3 
+
+# применение темы
+(p1 | p2) /
+   p3 & theme(legend.position = "none", 
+              plot.background = element_rect(color = "black", linewidth = 1))
+
+# размеры объектов
+(p1 | p2) /
+  p3 + plot_layout(heights = c(2, 1), widths = c(3, 1))
 
 library(cowplot)
 
@@ -145,7 +155,8 @@ gg_penguins_text +
 # https://r-charts.com/color-palettes/
 gg_penguins_text +
   paletteer::scale_color_paletteer_c("grDevices::Purple-Yellow", 
-                                     direction = -1)
+                                     direction = -1,
+                                     guide = "colorsteps")
 
 # выделим цветом пингвинов, масса которых > 5 кг
 library(scales)
@@ -271,8 +282,5 @@ gg_annotated +
 gg_final_2
 
 # -------------------------------------------------------------------------
-
-
-# geomtextpath ------------------------------------------------------------
 
 
