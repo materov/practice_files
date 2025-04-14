@@ -19,6 +19,8 @@ library(scales)
 library(ggsci)
 library(viridis)
 
+# данные
+library(palmerpenguins)
 
 # вариации легенды в legendry ---------------------------------------------
 
@@ -129,6 +131,183 @@ base +
     )
   )
 
+# как график превратить в интерактивный? ----------------------------------
+
+library(ggiraph)
+# https://davidgohel.github.io/ggiraph/
+# https://www.ardata.fr/ggiraph-book/ <-- книга
+
+# данные
+mtcars_db <- rownames_to_column(mtcars, var = "carname")
+
+gg_ggiraph <- 
+  ggplot(data = mtcars_db,
+         mapping = aes(x = disp, y = qsec, 
+                       # для всплывающих подсказок
+                       tooltip = carname, data_id = carname)) + 
+  # вместо geom_point()
+  geom_point_interactive(size = 3, hover_nearest = TRUE) +
+  theme_minimal()
+
+# интерактивный график
+girafe(ggobj = gg_ggiraph)
+
+###############################
+# пример интерактивного графика
+###############################
+
+gg_ggiraph_barplot <-
+ggplot(data = diamonds, 
+       mapping = aes(x = color, fill = cut, 
+                     data_id = cut)) +
+  geom_bar_interactive(
+    aes(tooltip = sprintf("%s: %.0f", fill, after_stat(count))),
+    size = 3
+  )
+
+girafe(ggobj = gg_ggiraph_barplot)
+
+# анимации в gganimate ----------------------------------------------------
+
+library(gganimate)
+
+################
+# базовый график
+################
+
+library(gapminder)
+library(scales)
+
+base_gg <- 
+  gapminder |>
+  ggplot(aes(x = gdpPercap, y = lifeExp, 
+             size = pop,
+             fill = continent)) +
+  geom_point(shape = 21, colour = "white", stroke = 0.2, alpha = 0.8) +
+  scale_x_log10() + 
+  scale_size(range = c(2, 12)) +
+  scale_fill_manual(values = c("#A053A1", "#DB778F", "#E69F52", "#09A39A", "#5869C7")) +
+  silgelib::theme_roboto() +
+  labs(x = "ВВП на душу населения", y = "Ожидаемая продолжительность жизни\n") +
+  facet_wrap(~continent, scale = "free") +
+  theme(legend.position = "none")
+
+base_gg
+
+# анимация
+
+library(gganimate)
+
+base_gg + 
+  transition_time(year) +
+  labs(title = "Год: {frame_time}")
+
+# текстовые аннотации вдоль осей ------------------------------------------
+
+library(geomtextpath)
+
+gg_textpath <- 
+tibble(x = 1:20, y = -2 * x^2 + 1) |>
+  ggplot(aes(x, y)) +
+  geom_line(linewidth = 1) 
+
+gg_textpath +
+  geom_labelpath(size = 5, 
+                 label = "пример текста",
+                 fill = "#F6F6FF")
+
+gg_textpath +
+  geom_textline(size = 5, 
+                label = "пример текста",
+                size = 10,
+                hjust = 0.75,
+                vjust = 0)
+
+
+# надграфики --------------------------------------------------------------
+
+gg_side_plot <- 
+  penguins |> 
+  na.omit() |> 
+  ggplot(aes(x = bill_length_mm,
+             y = bill_depth_mm,
+             fill = species)) + 
+  geom_point(pch = 21,
+             size = 4,
+             color = "white", 
+             alpha = 0.8) +
+  theme_grey(base_size = 13) +
+  scale_fill_manual(
+    values = c("#0072B2", 
+               "#D55E00", 
+               "#018571")
+  )
+
+gg_side_plot
+
+library(ggside)
+# https://github.com/jtlandis/ggside
+
+gg_side_plot +
+  geom_xsideboxplot(aes(y = species), 
+                    orientation = "y",
+                    alpha = 0.8) +
+  geom_ysidedensity(aes(x = after_stat(density)), 
+                    position = "identity",
+                    alpha = 0.8) +
+  scale_ysidex_continuous(guide = guide_axis(angle = 90), 
+                          minor_breaks = NULL) +
+  theme(ggside.panel.scale = 0.3,
+        legend.position = "none")
+
+
+
+# увеличения части графика ------------------------------------------------
+
+library(ggforce)
+
+# исходный график
+gg_for_scale <- penguins |> 
+  na.omit() |> 
+  ggplot(aes(x = bill_length_mm,
+             y = bill_depth_mm,
+             fill = species,
+             size = body_mass_g)) + 
+  geom_point(pch = 21,
+             color = "white", 
+             alpha = 0.7) +
+  theme_bw(base_size = 13) +
+  scale_fill_manual(
+    values = c(Adelie = "#0072B2", 
+               Chinstrap = "#D55E00", 
+               Gentoo = "#018571"),
+    name = NULL,
+    guide = guide_legend(
+      direction = "horizontal",
+      override.aes = list(size = 4,
+                          alpha = 1)
+    ) 
+  ) +
+  guides(size = "none") +
+  theme(
+    legend.position = "top",
+    legend.justification = "right",
+    legend.box.spacing = unit(0.1, "cm"),
+    legend.text = element_text(size = 13)
+  ) +
+  labs(x = "Длина клюва",
+       y = "Высота клюва") +
+  scale_x_continuous(name = "Длина клюва",
+                     labels = function(x) str_c(x, " мм")) +
+  scale_y_continuous(name = "Высота клюва",
+                     labels = function(x) str_c(x, " мм"))
+
+gg_for_scale + facet_zoom(xlim = c(40, 45), 
+                          show.area = TRUE)
+
+gg_for_scale + facet_zoom(xy = species == "Chinstrap", 
+                          split = TRUE)
+
 # таблицы в gt ------------------------------------------------------------
 
 # почему gt?
@@ -137,24 +316,3 @@ base +
 
 
 
-# как график превратить в интерактивный? ----------------------------------
-
-
-
-# анимации в gganimate ----------------------------------------------------
-
-
-
-library(gganimate)
-
-library(ggiraph)
-
-library(magick)
-
-library(geomtextpath)
-library(ggtext)
-
-# ggtext
-# ggforce - увеличение части графика
-# geomtextpath
-# gganimate
