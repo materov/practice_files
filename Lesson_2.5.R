@@ -1,9 +1,10 @@
-# Работа с {ggplot2} и расширениями {ggplot2} -----------------------------
+# Дополнительные вопросы визуализации данных в R --------------------------
 # 17 апреля 2025 года
 # Е.Н. Матеров для курса ITMO Большие данные и аналитика
-# ПЗ 2.4
-# цель занятия - отработать навыки работы с библиотекой {ggplot2}
+# ПЗ 2.5
+# цель занятия - отработать навыки работы с библиотекой {ggplot2},
 # а также расширениями {ggplot2}
+# https://www.youtube.com/watch?v=aMtEgUAWYjw&ab_channel=AlbertRapp
 
 # загрузка библиотек ------------------------------------------------------
 library(tidyverse)
@@ -19,23 +20,26 @@ library(ggsci)
 library(viridis)
 
 
+# вариации легенды в legendry ---------------------------------------------
 
-# legendry ----------------------------------------------------------------
+#####################
+# пузырьковая легенда
+#####################
 
 library(legendry)
+# https://teunbrand.github.io/legendry/
 
-# bubble-легенда
 gapminder::gapminder |>
   dplyr::filter(year == max(year)) |>
   ggplot(aes(gdpPercap, lifeExp, 
              size = pop, 
              fill = continent)) +
   geom_point(pch = 21, alpha = 0.8) +
-  # новинка для легенды!
+  # новый тип легенды!
   scale_size_area(
     limits = c(0, NA), max_size = 20,
     breaks = c(0, 100, 500, 1000)*1e6,
-    labels = c(0, "100M", "500M", "1B"),
+    labels = c(0, "100 млн", "500 млн", "1 млрд"),
     guide  = guide_circles(vjust = 1)
   ) +
   scale_fill_discrete(guide = 
@@ -49,7 +53,49 @@ gapminder::gapminder |>
     size = "Население"
   )
 
+##########################
+# вложенные подписи к осям
+##########################
+
+df_for_legend <- data.frame(
+  item = c("Кофе", "Чай", "Яблоко", "Груша"),
+  type = c("Напиток", "Напиток", "Фрукт", "Фрукт"),
+  amount = c(5, 1, 2, 3)
+)
+df_for_legend
+
+plain <- df_for_legend |>
+  ggplot(aes(interaction(item, type), amount)) +
+  geom_col() + labs(x = "", y = "количество")
+
+plain
+plain + guides(x = "axis_nested")
+
+##########################
+# вложенные подписи к осям
+##########################
+
+presidents <- key_range_map(presidential, 
+                            start = start, 
+                            end   = end, 
+                            name  = name)
+
+eco <- economics |>
+  ggplot(aes(date, unemploy)) +
+  geom_line() +
+  labs(x = "", y = "Количество безработных")
+
+eco + guides(x = guide_axis_nested(key = presidents)) +
+  # поля
+  theme(plot.margin = ggplot2::margin(t = 0.2,
+                                      r = 0.5, 
+                                      b = 0.2, 
+                                      l = 0.3, "cm"))
+
+##################
 # вариации легенды
+##################
+
 base <- ggplot(mpg, aes(displ, hwy, colour = cty)) +
   geom_point() +
   labs(
@@ -89,13 +135,24 @@ base +
 # лучшая библиотека для отображения статических таблиц
 # идеология сходна с ggplot2
 
-# gganimate ---------------------------------------------------------------
+
+
+# как график превратить в интерактивный? ----------------------------------
+
+
+
+# анимации в gganimate ----------------------------------------------------
+
+
 
 library(gganimate)
 
+library(ggiraph)
 
+library(magick)
 
-
+library(geomtextpath)
+library(ggtext)
 
 # ggtext
 # ggforce - увеличение части графика
