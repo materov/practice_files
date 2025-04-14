@@ -113,6 +113,19 @@ gg_penguins +
 
 # 4. Markdown в подписях к графику ----------------------------------------
 
+library(marquee)
+
+markdown_text <- "Это {.red **текст**}, написанный в _Markdown_"
+
+tibble::tibble(x = 1, y = 1, label = markdown_text) |>
+  ggplot(aes(x, y)) +
+  geom_marquee(
+    aes(label = label),
+    size = 9,
+    family = "Times New Roman"
+  ) +
+  theme_void()
+
 library(ggtext)
 
 gg_penguins_text <-
