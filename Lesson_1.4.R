@@ -15,6 +15,8 @@
 
 # многое можно делать непосредственно и в base R,
 # однако tidyverse дает больше возможностей
+# Base R equivalents of tidyverse verbs
+# https://mansthulin.se/posts/basetidyverseverbs/
 mtcars |> 
   transform(avg = mpg / wt) |>
   subset(avg > 5,
