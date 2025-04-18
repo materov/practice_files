@@ -8,10 +8,13 @@
 
 # загрузка библиотек ------------------------------------------------------
 library(tidyverse)
-conflicted::conflicts_prefer(dplyr::filter)
+conflicted::conflicts_prefer(dplyr::filter,
+                             dplyr::select)
 library(magrittr)
 
 # темы графиков
+# https://github.com/hrbrmstr/hrbrthemes
+# https://github.com/eddelbuettel/tinythemes
 library(hrbrthemes) # либо library(tinythemes)
 # шкалирование
 library(scales)
@@ -32,7 +35,8 @@ library(legendry)
 # https://teunbrand.github.io/legendry/
 
 gapminder::gapminder |>
-  dplyr::filter(year == max(year)) |>
+  # dplyr::filter(year == max(year)) |>
+  filter(year == max(year)) |>
   ggplot(aes(gdpPercap, lifeExp, 
              size = pop, 
              fill = continent)) +
@@ -66,28 +70,30 @@ df_for_legend <- data.frame(
 )
 df_for_legend
 
-plain <- df_for_legend |>
+gg_plain <- df_for_legend |>
   ggplot(aes(interaction(item, type), amount)) +
   geom_col() + labs(x = "", y = "количество")
 
-plain
-plain + guides(x = "axis_nested")
+gg_plain
+gg_plain + guides(x = "axis_nested")
 
 ##########################
 # вложенные подписи к осям
 ##########################
 
+presidential
 presidents <- key_range_map(presidential, 
                             start = start, 
                             end   = end, 
                             name  = name)
 
-eco <- economics |>
+economics
+gg_eco <- economics |>
   ggplot(aes(date, unemploy)) +
   geom_line() +
   labs(x = "", y = "Количество безработных")
 
-eco + guides(x = guide_axis_nested(key = presidents)) +
+gg_eco + guides(x = guide_axis_nested(key = presidents)) +
   # поля
   theme(plot.margin = ggplot2::margin(t = 0.2,
                                       r = 0.5, 
@@ -98,15 +104,15 @@ eco + guides(x = guide_axis_nested(key = presidents)) +
 # вариации легенды
 ##################
 
-base <- ggplot(mpg, aes(displ, hwy, colour = cty)) +
+gg_base <- ggplot(mpg, aes(displ, hwy, colour = cty)) +
   geom_point() +
   labs(
     x = "Рабочий объем двигателя",
     y = "Расход в милях по шоссе на галлон",
-    col = "Расход в милях \nпо городу \nна галлон"
+    col = "Расход по городу \nв милях на галлон"
   ) +
   theme(axis.line = element_line())
-base
+gg_base
 
 # отображение для скобки
 efficient_bracket <- primitive_bracket(
@@ -120,9 +126,9 @@ efficient_bracket <- primitive_bracket(
   )
 )
 
-base + guides(y = guide_axis_stack("axis", efficient_bracket))
+gg_base + guides(y = guide_axis_stack("axis", efficient_bracket))
 
-base + 
+gg_base + 
   scale_colour_viridis_c(
     guide = compose_sandwich(
       middle = gizmo_density(), 
@@ -139,6 +145,7 @@ library(ggiraph)
 
 # данные
 mtcars_db <- rownames_to_column(mtcars, var = "carname")
+mtcars_db |> as_tibble()
 
 gg_ggiraph <- 
   ggplot(data = mtcars_db,
@@ -148,6 +155,7 @@ gg_ggiraph <-
   # вместо geom_point()
   geom_point_interactive(size = 3, hover_nearest = TRUE) +
   theme_minimal()
+gg_ggiraph
 
 # интерактивный график
 girafe(ggobj = gg_ggiraph)
@@ -210,6 +218,7 @@ gg_textpath <-
 tibble(x = 1:20, y = -2 * x^2 + 1) |>
   ggplot(aes(x, y)) +
   geom_line(linewidth = 1) 
+gg_textpath
 
 gg_textpath +
   geom_labelpath(size = 5, 
@@ -314,5 +323,77 @@ gg_for_scale + facet_zoom(xy = species == "Chinstrap",
 # лучшая библиотека для отображения статических таблиц
 # идеология сходна с ggplot2
 
+library(gt)
 
+gtcars |>
+  select(-bdy_style, -mfr, -trim, -drivetrain, -trsmn, - ctry_origin) |>
+  slice(1:8) |>
+  gt(rowname_col = "model") |>
+  tab_spanner(
+    label = "производительность", 
+    columns = c(hp, hp_rpm, trq, trq_rpm, mpg_c, mpg_h)
+  )
 
+# совмещение gt-таблиц и ggplot-графиков ----------------------------------
+
+pizza_gtable <- 
+  pizzaplace |>
+  dplyr::filter(type %in% c("chicken", "supreme")) |>
+  dplyr::group_by(type, size) |>
+  dplyr::summarize(
+    sold = dplyr::n(),
+    income = sum(price),
+    .groups = "drop"
+  ) |>
+  gt(
+    rowname_col = "size",
+    groupname_col = "type",
+    row_group_as_column = TRUE
+  ) |>
+  tab_header(title = "Продажи пиццы в 2015 году") |>
+  fmt_integer(columns = sold) |>
+  fmt_currency(columns = income) |>
+  summary_rows(
+    fns = list(label = "Все размеры", fn = "sum"),
+    side = c("top"),
+    fmt = list(
+      ~ fmt_integer(., columns = sold),
+      ~ fmt_currency(., columns = income)
+    )
+  ) |>
+  grand_summary_rows(
+    columns = c("sold", "income"),
+    fns = Sum ~ sum(.),
+    fmt = list(
+      ~ fmt_integer(., columns = sold),
+      ~ fmt_currency(., columns = income)
+    )
+  ) |>
+  tab_options(summary_row.background.color = "gray98") |>
+  tab_stub_indent(
+    rows = everything(),
+    indent = 2
+  ) |>
+  as_gtable()
+
+pizza_plot <-
+  pizzaplace |>
+  dplyr::mutate(date = as.Date(date)) |>
+  dplyr::filter(type %in% c("chicken", "supreme")) |>
+  dplyr::group_by(date, type) |>
+  dplyr::summarize(
+    sold = dplyr::n(),
+    .groups = "drop"
+  ) |>
+  ggplot() +
+  geom_line(aes(x = date, y = sold, color = type, group = type)) +
+  facet_wrap(~type, nrow = 2) +
+  scale_x_date(date_labels = "%b", breaks = "1 month") +
+  theme_minimal() +
+  silgelib::theme_roboto() +
+  theme(legend.position = "none") +
+  labs(x = "", y = "Количество продаж пиццы",
+       color = "вид пиццы")
+
+library(patchwork)
+pizza_plot + pizza_gtable
