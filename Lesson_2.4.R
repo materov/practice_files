@@ -18,11 +18,11 @@ library(patchwork)
 
 p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp)) + 
   ggtitle("График 1")
-p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear)) + 
+p2 <- ggplot(mtcars) + geom_boxplot(aes(factor(gear), disp, group = gear)) + 
   ggtitle("График 2")
-p3 <- ggplot(mtcars) + geom_smooth(aes(disp, qsec)) + 
+p3 <- ggplot(mtcars) + geom_smooth(aes(disp, qsec), se = TRUE) + 
   labs(tag = "A")
-p4 <- ggplot(mtcars) + geom_bar(aes(carb)) + 
+p4 <- ggplot(mtcars) + geom_bar(aes(factor(carb))) + 
   labs(tag = "B")
 
 # комбинирование графиков в patchwork
@@ -98,7 +98,7 @@ df_penguins |>
 ggplot(aes(x = bill_length_mm, 
            y = bill_depth_mm)) +
   geom_point(aes(color = body_mass,
-                 size = body_mass), 
+                  size = body_mass), 
              alpha = 0.5) 
 
 gg_penguins
@@ -165,7 +165,7 @@ gg_penguins_text +
 # больше возможностей в библиотеке viridis
 # https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html
 gg_penguins_text +
-  viridis::scale_colour_viridis(option = "plasma", direction = -1)
+  viridis::scale_colour_viridis(option = "plasma", direction = 1)
 
 # палитры:
 # https://r-charts.com/color-palettes/
@@ -254,7 +254,7 @@ df_penguins <- df_penguins |>
   mutate(
     type = 
       case_when(
-        body_mass_g > 5000 ~ "масса > 5 кг",
+        body_mass > 5 ~ "масса > 5 кг",
         .default = "масса < 5 кг"
       ),
     type = factor(type)
