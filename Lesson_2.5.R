@@ -334,6 +334,22 @@ gtcars |>
     columns = c(hp, hp_rpm, trq, trq_rpm, mpg_c, mpg_h)
   )
 
+
+# пример тепловой карты на основе {gt} ------------------------------------
+
+library(gt)
+library(palmerpenguins)
+library(tidyverse)
+
+penguins |> 
+  head() |>
+  select(-island, -year) |>
+  gt() |>
+  data_color(
+    method = "numeric",
+    palette = viridis::plasma(n = 4)
+  )
+
 # совмещение gt-таблиц и ggplot-графиков ----------------------------------
 
 pizza_gtable <- 
@@ -397,3 +413,6 @@ pizza_plot <-
 
 library(patchwork)
 pizza_plot + pizza_gtable
+
+# forgts переводит Excel-таблицы в gt
+# https://luisdva.github.io/forgts/
