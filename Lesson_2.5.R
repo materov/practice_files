@@ -142,6 +142,9 @@ gg_base +
 
 # как график превратить в интерактивный? ----------------------------------
 
+# один из способов - сделать plotly-график
+# https://plotly.com/ggplot2/ - ggplotly
+
 library(ggiraph)
 # https://davidgohel.github.io/ggiraph/
 # https://www.ardata.fr/ggiraph-book/ <-- книга
