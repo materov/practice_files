@@ -6,6 +6,9 @@
 # а также расширениями {ggplot2}
 # https://www.youtube.com/watch?v=aMtEgUAWYjw&ab_channel=AlbertRapp
 
+# еще палитры:
+# https://simson.io/regenbogen/
+
 # загрузка библиотек ------------------------------------------------------
 library(tidyverse)
 conflicted::conflicts_prefer(dplyr::filter,
