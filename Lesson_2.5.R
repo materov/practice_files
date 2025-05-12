@@ -1,5 +1,5 @@
 # Дополнительные вопросы визуализации данных в R --------------------------
-# 17 апреля 2025 года
+# 24 апреля 2025 года
 # Е.Н. Матеров для курса ITMO Большие данные и аналитика
 # ПЗ 2.5
 # цель занятия - отработать навыки работы с библиотекой {ggplot2},
@@ -8,6 +8,9 @@
 
 # еще палитры:
 # https://simson.io/regenbogen/
+
+# примеры графики в base R:
+# https://poisonalien.github.io/basegraphics/baseplots.html
 
 # загрузка библиотек ------------------------------------------------------
 library(tidyverse)
@@ -236,7 +239,8 @@ gg_textpath +
                 label = "пример текста",
                 size = 10,
                 hjust = 0.75,
-                vjust = 0)
+                vjust = 0
+                )
 
 
 # надграфики --------------------------------------------------------------
@@ -274,7 +278,6 @@ gg_side_plot +
                           minor_breaks = NULL) +
   theme(ggside.panel.scale = 0.3,
         legend.position = "none")
-
 
 
 # увеличения части графика ------------------------------------------------
@@ -320,7 +323,7 @@ gg_for_scale <- penguins |>
 gg_for_scale + facet_zoom(xlim = c(40, 45), 
                           show.area = TRUE)
 
-gg_for_scale + facet_zoom(xy = species == "Chinstrap", 
+  gg_for_scale + facet_zoom(xy = species == "Chinstrap", 
                           split = TRUE)
 
 # таблицы в gt ------------------------------------------------------------
@@ -353,7 +356,7 @@ penguins |>
   gt() |>
   data_color(
     method = "numeric",
-    palette = viridis::plasma(n = 4)
+    palette = viridis::mako(n = 4)
   )
 
 # совмещение gt-таблиц и ggplot-графиков ----------------------------------
