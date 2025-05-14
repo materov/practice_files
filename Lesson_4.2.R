@@ -189,4 +189,139 @@ library(patchwork)
 
 model_heatmap + model_mosaic
 
+###############################
+# рассмотрим числовой предиктор
+# задача регрессии
+###############################
 
+# библиотеки
+library(tidymodels)
+library(tidyverse)
+tidymodels_prefer()
+
+# исходные данные ---------------------------------------------------------
+
+our_data <- diamonds |>
+  na.omit() |>
+  select(price, carat, depth, table, x, y, z)
+
+# разбиение на выборки ----------------------------------------------------
+
+splits <- initial_split(our_data)
+
+diamonds_train <- training(splits)
+diamonds_test <- testing(splits)
+
+diamonds_folds <- vfold_cv(diamonds_train)
+
+# модель ------------------------------------------------------------------
+
+# 1-я модель: random forest
+rf_reg_spec <- 
+  rand_forest(trees = 200, 
+              min_n = 5) |>
+  set_mode("regression") |>
+  set_engine("ranger", 
+             # для того, чтобы потом можно было выявить важность признаков
+             importance = "impurity")
+rf_reg_spec
+
+# 2-я модель: линейная регрессия
+
+lin_reg_spec <- linear_reg()
+
+# предскажем цены на алмазы -----------------------------------------------
+
+rf_reg_fit <- rf_reg_spec |> 
+  fit(price ~ ., data = diamonds_train)
+rf_reg_fit
+
+lr_reg_fit <- lin_reg_spec |> 
+  fit(price ~ ., data = diamonds_train)
+lr_reg_fit |> tidy()
+
+# проверим качество прогнозирования
+
+predict(rf_reg_fit, new_data = diamonds_test)
+
+augment(rf_reg_fit, new_data = diamonds_test) |>
+  select(price, .pred) |>
+  ggplot(aes(x = price, y = .pred)) + 
+  geom_point(alpha = 0.1) +
+  geom_smooth(se = FALSE, method = "lm")
+
+augment(lr_reg_fit, new_data = diamonds_test) |>
+  select(price, .pred) |>
+  ggplot(aes(x = price, y = .pred)) + 
+  geom_point(alpha = 0.1) +
+  geom_smooth(se = FALSE, method = "lm")
+
+# рассмотрим подход {tidymodels} ------------------------------------------
+
+# формула + "рецепт"
+our_recipe <- recipe(price ~ .,
+                     data = our_data) |>
+  # потенциально удалит переменные, которые являются 
+  # крайне разреженными и несбалансированными
+  step_nzv(all_predictors()) |> 
+  # удалит переменные, имеющие большую абсолютную корреляцию с другими переменными
+  step_corr(all_numeric_predictors()) |>
+  # нормализует числовые данные так, чтобы стандартное отклонение 
+  # было равно единице, а среднее значение — нулю
+  step_normalize(all_numeric_predictors()) 
+
+workflow_set <-
+  workflow_set(
+    preproc = list(our_recipe),
+    models = list(
+      rand_for = rf_reg_spec,
+      lin_reg = lin_reg_spec)
+  ) |>
+  workflow_map(resamples = diamonds_folds,
+               metrics = metric_set(rmse, mae, rsq))
+
+# выбираем модель
+
+rank_results(workflow_set,
+             select_best = TRUE)
+
+best_model_id <- "recipe_rand_for"
+
+workflow_set |> autoplot() +
+  theme_bw()
+
+# дообучаем модель
+
+best_fit <-
+  workflow_set |>
+  extract_workflow_set_result(best_model_id) |>
+  select_best(metric = "rmse")
+
+final_workflow <-
+  workflow_set |>
+  extract_workflow(best_model_id) |>
+  finalize_workflow(best_fit)
+
+final_fit <-
+  final_workflow |>
+  last_fit(splits)
+
+collect_metrics(final_fit)
+
+final_model <- fit(final_workflow, our_data)
+
+# визуально сравним качество новой модели
+
+augment(final_model, new_data = diamonds_test) |>
+  select(price, .pred) |>
+  ggplot(aes(x = price, y = .pred)) + 
+  geom_point(alpha = 0.1) +
+  geom_smooth(se = FALSE, method = "lm")
+
+# важность предикторов в модели -------------------------------------------
+
+library(vip)
+
+final_fit |>
+  extract_fit_parsnip() |>
+  vip(num_features = 5)
