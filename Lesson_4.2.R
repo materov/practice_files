@@ -37,8 +37,8 @@ penguins_df <- penguins |>
 
 penguins_df |>
   ggplot(aes(x = flipper_length_mm, 
-             y = bill_length_mm, 
-             color = sex, size = body_mass_g)) +
+             y = body_mass_g, 
+             color = sex, size = bill_length_mm)) +
   geom_point(alpha = 0.4) +
   facet_wrap(~species) +
   theme_bw()
@@ -203,11 +203,16 @@ tidymodels_prefer()
 
 our_data <- diamonds |>
   na.omit() |>
-  select(price, carat, depth, table, x, y, z)
+  select(price, carat, depth, table, x, y, z, color, cut)
+
+our_data |>
+  ggplot(aes(x = carat, y = price)) + geom_point(alpha = 0.2)
 
 # разбиение на выборки ----------------------------------------------------
 
-splits <- initial_split(our_data)
+set.seed(2025)
+
+splits <- initial_split(our_data, prop = 0.8)
 
 diamonds_train <- training(splits)
 diamonds_test <- testing(splits)
@@ -309,6 +314,8 @@ final_fit <-
 collect_metrics(final_fit)
 
 final_model <- fit(final_workflow, our_data)
+
+# summary(final_model)
 
 # визуально сравним качество новой модели
 
