@@ -245,3 +245,29 @@ library(vip)
 extract_workflow(spam_fit) |>
   extract_fit_parsnip() |>
   vip()
+
+# deploy
+library(vetiver)
+
+v <- extract_workflow(spam_fit) |> 
+  vetiver_model("spam-email-rf")
+v
+
+library(plumber)
+library(vetiver)
+
+v <- extract_workflow(spam_fit) |> 
+  vetiver_model("spam-email-rf")
+v
+
+library(plumber)
+pr() |> 
+  vetiver_api(v) |> 
+  pr_run()
+
+pr() |> 
+  vetiver_api(v) |> 
+  pr_run()
+
+# еще одна модель ---------------------------------------------------------
+
