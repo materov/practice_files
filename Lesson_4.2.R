@@ -9,6 +9,9 @@
 # https://naukaidannye.netlify.app/blog/posts/2021-02-19-modeltime/
 # в работе с географическими данными:
 # https://geocompx.org/post/2025/sml-bp1/
+# анализ текстов:
+# Supervised Machine Learning for Text Analysis in R
+# https://smltar.com/
 
 # мы рассмотрим достаточно классические задачи машинного обучения:
 # 1. задачи классификации
