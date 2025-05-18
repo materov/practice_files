@@ -147,6 +147,24 @@ ggplot() +
   theme_void() + 
   theme(legend.position = "none")
 
+
+# пример растровых данных - высоты США ------------------------------------
+
+bbox_usa <- data.frame(x = c(-125.0011, -66.9326), 
+                       y = c(24.9493, 49.5904))
+
+sf_bbox_usa <- sf::st_as_sf(bbox_usa, coords = c("x", "y"), crs = 4326)
+sf_bbox_usa
+
+elev_usa <- get_elev_raster(locations = sf_bbox_usa, z = 5)
+terra::plot(elev_usa)
+
+names(elev_usa) <- "z"
+
+library(tmap)
+tm_shape(elev_usa) +
+  tm_raster("z")
+
 # пример растровых данных -------------------------------------------------
 
 # Питер
@@ -232,5 +250,21 @@ mapboxgl(
 ) |> 
   set_snow()
 
+
+# mapsf -------------------------------------------------------------------
+
+library(mapsf)
+
+# импорт набора данных
+mtq <- mf_get_mtq()
+# базовая карта
+mf_map(x = mtq)
+# символы
+mf_map(x = mtq, var = "POP", type = "prop", leg_pos = "topright")
+# слой
+mf_layout(
+  title = "Population in Martinique",
+  credits = "T. Giraud; Sources: INSEE & IGN, 2018"
+)
 
 
