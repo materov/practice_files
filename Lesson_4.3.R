@@ -4,9 +4,10 @@
 # ПЗ 4.3
 # цель занятия - отработать навыки работы с библиотекой {tidymodels}
 
-# два руководства:
+# три руководства:
 # https://juliasilge.github.io/tidymodels-tutorial/
 # https://workshops.tidymodels.org/
+# https://apreshill.github.io/tidymodels-it/
 
 # использование предварительной обработки 
 # данных в {tidymodels} с помощью библиотеки {recipes}
