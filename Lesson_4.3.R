@@ -270,4 +270,127 @@ pr() |>
   pr_run()
 
 # еще одна модель ---------------------------------------------------------
+# https://juliasilge.com/blog/nyt-bestsellers/
 
+library(tidyverse)
+nyt_titles <- read_tsv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-05-10/nyt_titles.tsv')
+
+glimpse(nyt_titles)
+
+nyt_titles |>
+  ggplot(aes(total_weeks)) +
+  #scale_x_log10() +
+  geom_histogram(bins = 40)
+
+# сколько недель в топе?
+nyt_titles |>
+  group_by(author) |>
+  summarise(
+    n = n(),
+    total_weeks = median(total_weeks)
+  ) |>
+  arrange(-n)
+
+# больше 4-х недель в среднем?
+nyt_titles |>
+  group_by(author) |>
+  summarise(
+    n = n(),
+    total_weeks = median(total_weeks)
+  ) |>
+  mutate(
+    weeks_4 = 
+      case_when(
+        total_weeks >= 4 ~ "more than 4",
+        .default = "less than 4"
+      )
+  ) |>
+  count(weeks_4)
+
+library(tidymodels)
+
+set.seed(123)
+books_split <-
+  nyt_titles |>
+  transmute(
+    author,
+    total_weeks = if_else(total_weeks > 4, "long", "short")
+  ) |>
+  na.omit() |>
+  initial_split(strata = total_weeks)
+
+books_train <- training(books_split)
+books_test <- testing(books_split)
+
+# сколько по неделям?
+books_train |> count(total_weeks)
+
+set.seed(234)
+book_folds <- vfold_cv(books_train, strata = total_weeks)
+book_folds
+
+library(textrecipes)
+
+svm_spec <- svm_linear(mode = "classification")
+
+books_rec <-
+  recipe(total_weeks ~ author, data = books_train) |>
+  # преобразует предиктор символа в tokenпеременную с помощью токенизации WordPiece
+  # WordPiece - это алгоритм токенизации, разработанный Google для предварительного обучения BERT
+  step_tokenize_wordpiece(author, max_chars = 10) |>
+  # преобразует tokenпеременную для фильтрации на основе частот
+  step_tokenfilter(author, max_tokens = 100) |>
+  # term frequency of tokens
+  step_tf(author) |>
+  step_normalize(all_numeric_predictors())
+
+# рассмотрим процесс на основе SVM
+# используем токенизацию на основе подслов (wordpiece tokenization). 
+# подход к токенизации основан на словаре, используемом BERT
+# BERT представляет собой нейронную сеть, основу которой составляет 
+# композиция кодировщиков трансформера. BERT является автокодировщиком
+prep(books_rec) |> bake(new_data = NULL) |> glimpse() |> head()
+
+book_wf <- workflow(books_rec, svm_spec)
+book_wf
+
+library(future)
+plan(sequential)
+
+set.seed(123)
+books_metrics <- metric_set(accuracy, sens, spec)
+book_rs <- fit_resamples(book_wf, 
+                         resamples = book_folds, 
+                         metrics = books_metrics)
+collect_metrics(book_rs)
+
+final_rs <- last_fit(book_wf, 
+                     books_split, 
+                     metrics = books_metrics)
+collect_metrics(final_rs)
+
+# мы лучше умеем предсказывать, какие книги попадут в список на короткое время, 
+# чем те, которые появятся в нем надолго
+collect_predictions(final_rs) |>
+  conf_mat(total_weeks, .pred_class) |>
+  autoplot()
+
+# пример извлечения данных
+final_fitted <- extract_workflow(final_rs)
+augment(final_fitted, new_data = slice_sample(books_test, n = 1))
+
+# мы также можем изучить эту модель (которая является просто 
+#  линейной с коэффициентами), чтобы понять, что управляет ее предсказаниями
+
+tidy(final_fitted) |>
+  slice_max(abs(estimate), n = 20) |>
+  mutate(
+    term = str_remove_all(term, "tf_author_"),
+    term = fct_reorder(term, abs(estimate))
+  ) |>
+  ggplot(aes(x = abs(estimate), y = term, fill = estimate > 0)) +
+  geom_col() +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_fill_discrete(labels = c("Меньше недель", "Больше недель")) +
+  labs(x = "Оценка по линейной модели SVM (абсолютное значение)", y = NULL, 
+       fill = "Сколько недельвходит \nв список бестселлеров?")
