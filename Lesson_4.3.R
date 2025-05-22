@@ -14,7 +14,7 @@
 # https://r-posts.com/mastering-data-preprocessing-in-r-with-the-recipes-package/
 
 # общая идея работы с "рецептом"
-# "рецептом" позволяет определять последовательность этапов 
+# "рецепт" позволяет определять последовательность этапов 
 # предварительной обработки 
 # (таких как центрирование, масштабирование и кодирование) 
 # простым и воспроизводимым способом
@@ -43,6 +43,8 @@ train_data_preprocessed <- juice(prepared_recipe)
 test_data_preprocessed <- bake(prepared_recipe, 
                                new_data = testing_data)
 
+# -------------------------------------------------------------------------
+
 # библиотека, которая "подсказывает" пути решения задач с ML
 # это полезный способ быстрого создания фрагментов кода, 
 # соответствующих моделям, с использованием {tidymodels}
@@ -53,7 +55,7 @@ library(magrittr)
 library(tidyverse)
 library(tidymodels)
 
-penguins_df <- penguins |>
+penguins_df <- palmerpenguins::penguins |>
   filter(!is.na(sex)) |>
   select(-year, -island)
 
@@ -248,12 +250,6 @@ extract_workflow(spam_fit) |>
   vip()
 
 # deploy
-library(vetiver)
-
-v <- extract_workflow(spam_fit) |> 
-  vetiver_model("spam-email-rf")
-v
-
 library(plumber)
 library(vetiver)
 
@@ -336,10 +332,10 @@ svm_spec <- svm_linear(mode = "classification")
 
 books_rec <-
   recipe(total_weeks ~ author, data = books_train) |>
-  # преобразует предиктор символа в tokenпеременную с помощью токенизации WordPiece
+  # преобразует предиктор символа в token-переменную с помощью токенизации WordPiece
   # WordPiece - это алгоритм токенизации, разработанный Google для предварительного обучения BERT
   step_tokenize_wordpiece(author, max_chars = 10) |>
-  # преобразует tokenпеременную для фильтрации на основе частот
+  # преобразует token-переменную для фильтрации на основе частот
   step_tokenfilter(author, max_tokens = 100) |>
   # term frequency of tokens
   step_tf(author) |>
@@ -394,4 +390,4 @@ tidy(final_fitted) |>
   scale_x_continuous(expand = c(0, 0)) +
   scale_fill_discrete(labels = c("Меньше недель", "Больше недель")) +
   labs(x = "Оценка по линейной модели SVM (абсолютное значение)", y = NULL, 
-       fill = "Сколько недельвходит \nв список бестселлеров?")
+       fill = "Сколько недель входит \nв список бестселлеров?")
