@@ -5,7 +5,7 @@
 # цель занятия - отработать навыки работы с географическими данными
 
 # источники:
-# https://tsamsonov.github.io/r-spatstat-course/
+# https://tsamsonov.github.io/gis-course/
 # https://www.paulamoraga.com/book-spatial/
 # https://r.geocompx.org/
 # https://ecodynizw.github.io/posts/r-spatial-data/
@@ -27,7 +27,7 @@ library(elevatr)
 pathshp <- system.file("shape/nc.shp", package = "sf")
 nc <- st_read(pathshp, quiet = TRUE)
 as_tibble(nc) |>
-  dplyr::select(AREA, geometry)
+  dplyr::select(AREA, geometry) |> View()
 
 # отображение площади регионов
 nc_ggplot <-
@@ -54,7 +54,7 @@ nc_ggplot +
 
 # https://r-spatial.github.io/mapview/
 library(mapview)
-mapview(nc, zcol = "AREA")
+mapview(nc, zcol = "NWBIR74")
 
 # leaflet -----------------------------------------------------------------
 
@@ -72,7 +72,7 @@ library(rnaturalearth)
 
 world <- ne_countries(returnclass = "sf")
 world |>
-  #as_tibble() |>
+  as_tibble() |>
   dplyr::select(name_long, geometry) |>
   head()
 
@@ -85,6 +85,7 @@ ggplot(world) +
 
 # NaturalEarth также предоставляет несколько наборов данных, 
 # таких как аэропорты, дороги, спорные территории 
+
 # давайте посмотрим на городские районы по всему миру
 
 urban <- ne_download(type = "urban_areas", 
@@ -266,5 +267,37 @@ mf_layout(
   title = "Population in Martinique",
   credits = "T. Giraud; Sources: INSEE & IGN, 2018"
 )
+
+
+# rayvista ----------------------------------------------------------------
+
+library(rayshader)
+library(rayvista)
+
+Amadablam <- plot_3d_vista(lat = 27.8599,
+                           long = 86.8614, 
+                           zscale = 6,
+                           zoom = 0.6,
+                           soliddepth = 4000,
+                           radius = 5000,
+                           overlay_detail = 14,
+                           theta = -65, phi = 25,
+                           windowsize = 1200,
+                           background = "grey10")
+
+Krasnoyarsk <- plot_3d_vista(lat = 56.01986, 
+                             long = 92.932413, 
+                             zscale = 3, 
+                             zoom = 0.5,
+                             # img_provider = "Thunderforest.Landscape",
+                             # api_key = "your_api_key_value",
+                             overlay_detail = 14,
+                             theta = -40,  
+                             phi = 25,
+                             windowsize = 1300,
+                             soliddepth = 50,
+                             # outlier_filter = 0.0001,
+                             fill_holes = TRUE)
+
 
 
