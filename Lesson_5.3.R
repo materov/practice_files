@@ -6,6 +6,7 @@
 
 # источники:
 # https://naukaidannye.netlify.app/blog/posts/2021-11-22-reachability/
+# https://cran.r-project.org/web/packages/osmdata/vignettes/osmdata.html
 
 # общие библиотеки
 library(tidyverse)
