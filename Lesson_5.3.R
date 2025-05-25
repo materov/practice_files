@@ -301,3 +301,55 @@ base_map +
   theme_void() +
   theme(legend.position = "none")
 
+
+# работа с 3D -------------------------------------------------------------
+
+library(rayshader)
+library(rayvista)
+
+# https://www.thunderforest.com/docs/apikeys/
+your_api_key_value <- "45c1a6554e91468aaa7b3cbc632355bf"
+
+SpB_3D <- plot_3d_vista(lat = 59.9565684, 
+                        long = 30.3108933, 
+                        zscale = 3, 
+                        zoom = 0.5,
+                        # OpenTopoMap
+                        img_provider = "Thunderforest.Landscape",
+                        api_key = your_api_key_value,
+                        overlay_detail = 14,
+                        theta = -40,  
+                        phi = 25,
+                        windowsize = 1300,
+                        soliddepth = 50,
+                        # outlier_filter = 0.0001,
+                        fill_holes = TRUE)
+
+
+SpB_3D_2 <- plot_3d_vista(lat = 59.9565684, 
+                          long = 30.3108933, 
+                          zscale = 3, 
+                          zoom = 0.5,
+                          # OpenTopoMap
+                          img_provider = "Thunderforest.Outdoors",
+                          api_key = your_api_key_value,
+                          overlay_detail = 14,
+                          theta = -40,  
+                          phi = 25,
+                          windowsize = 1300,
+                          soliddepth = 50,
+                          # outlier_filter = 0.0001,
+                          fill_holes = TRUE)
+
+HopkinsNZ <- plot_3d_vista(lat = -44.042238, 
+                           long = 169.860985, 
+                           radius = 5000, 
+                           overlay_detail = 14,
+                           elevation_detail = 13, 
+                           zscale = 5, 
+                           theta = 25, phi=25, zoom = 0.6,
+                           windowsize = 1200, 
+                           solid = T, 
+                           background = 'white')
+
+render_depth(focus = 0.6, focallength = 15, clear=TRUE)
