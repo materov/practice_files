@@ -304,6 +304,12 @@ base_map +
 
 
 # работа с 3D -------------------------------------------------------------
+# источники:
+# https://www.rayshader.com/
+# https://www.tylermw.com
+# https://www.tylermw.com/posts/data_visualization/adding-open-street-map-data-to-rayshader-maps-in-r.html
+
+# https://naukaidannye.netlify.app/blog/posts/2024-02-02%20rayvista/
 
 library(rayshader)
 library(rayvista)
