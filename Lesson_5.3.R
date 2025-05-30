@@ -68,6 +68,8 @@ districts <- districts_osm %>%
   mutate(area = st_area(.),
          region_area = as.numeric(area))
 
+View(districts)
+
 # центроиды районов
 regions <- cbind(districts, 
                  st_coordinates(st_centroid(districts))) |>
@@ -315,7 +317,7 @@ library(rayshader)
 library(rayvista)
 
 # https://www.thunderforest.com/docs/apikeys/
-your_api_key_value <- "45c1a6554e91468aaa7b3cbc632355bf"
+your_api_key_value <- "value"
 
 SpB_3D <- plot_3d_vista(lat = 59.9565684, 
                         long = 30.3108933, 
@@ -338,8 +340,8 @@ SpB_3D_2 <- plot_3d_vista(lat = 59.9565684,
                           zscale = 3, 
                           zoom = 0.5,
                           # OpenTopoMap
-                          img_provider = "Thunderforest.Outdoors",
-                          api_key = your_api_key_value,
+                          #img_provider = "Thunderforest.Outdoors",
+                          #api_key = your_api_key_value,
                           overlay_detail = 14,
                           theta = -40,  
                           phi = 25,
